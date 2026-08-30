@@ -17,6 +17,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root Health Check Route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: '🚀 3DOM API Backend is running!',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Middleware for JWT verification
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
