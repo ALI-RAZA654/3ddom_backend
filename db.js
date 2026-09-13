@@ -1,5 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
+
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+const Coupon = require('./models/Coupon');
+const Review = require('./models/Review');
+const RequestModel = require('./models/Request');
+const User = require('./models/User');
 
 const DB_FILE = path.join(__dirname, 'data.json');
 
@@ -68,7 +76,7 @@ const INITIAL_PRODUCTS = [
     stock: 45,
     rating: 4.85,
     reviewCount: 120,
-    image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80',
     description: 'Ultra-smooth, low-warp PLA+ engineered for high-speed printing with superior layer adhesion.',
     attributes: { material: 'PLA', diameter: '1.75mm', weight: '1kg', temp: '190-220°C' },
     isFeatured: true
@@ -85,7 +93,7 @@ const INITIAL_PRODUCTS = [
     stock: 30,
     rating: 4.75,
     reviewCount: 64,
-    image: 'https://images.unsplash.com/photo-1611117775350-ac3950990b70?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=80',
     description: 'Durable, weather-resistant PETG filament combining the ease of PLA with the strength of ABS.',
     attributes: { material: 'PETG', diameter: '1.75mm', weight: '1kg', temp: '230-250°C' },
     isFeatured: false
@@ -102,7 +110,7 @@ const INITIAL_PRODUCTS = [
     stock: 20,
     rating: 4.65,
     reviewCount: 41,
-    image: 'https://images.unsplash.com/photo-1614624532983-4ce03382d63d?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1581092162384-8987c1d64718?auto=format&fit=crop&w=800&q=80',
     description: 'Formulated ABS+ with minimal warping and chemical resistance for functional engineering prototypes.',
     attributes: { material: 'ABS', diameter: '1.75mm', weight: '1kg', temp: '240-260°C' },
     isFeatured: false
@@ -119,7 +127,7 @@ const INITIAL_PRODUCTS = [
     stock: 12,
     rating: 4.9,
     reviewCount: 29,
-    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80',
     description: 'Industrial grade carbon fiber reinforced nylon with high thermal tolerance and tensile strength.',
     attributes: { material: 'Nylon', diameter: '1.75mm', weight: '500g', temp: '280-300°C' },
     isFeatured: true
@@ -136,472 +144,98 @@ const INITIAL_PRODUCTS = [
     stock: 18,
     rating: 4.8,
     reviewCount: 22,
-    image: 'https://images.unsplash.com/photo-1612815150330-80e90c888d22?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=80',
     description: 'Weatherproof & UV-stable ASA filament designed for outdoor automotive & structural components.',
     attributes: { material: 'ASA', diameter: '1.75mm', weight: '1kg', temp: '240-260°C' },
     isFeatured: false
   },
-  {
-    id: 'prod-3d-9',
-    slug: 'hardened-steel-nozzle-04mm',
-    name: 'E3D V6 Hardened Steel Nozzle (0.4mm / 1.75mm)',
-    vertical: '3d-printing',
-    category: '3D Printer Parts',
-    brand: 'E3D',
-    price: 14.99,
-    originalPrice: 18.00,
-    stock: 100,
-    rating: 4.9,
-    reviewCount: 88,
-    image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80',
-    description: 'Wear-resistant hardened steel nozzle ideal for abrasive filaments like wood, glow-in-the-dark, and carbon fiber.',
-    attributes: { partType: 'Nozzle', diameter: '0.4mm', material: 'Hardened Steel' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-3d-10',
-    slug: 'all-metal-hotend-kit-high-temp',
-    name: 'Micro Swiss All Metal Hotend Kit (High Temp 300°C)',
-    vertical: '3d-printing',
-    category: '3D Printer Parts',
-    brand: 'Micro Swiss',
-    price: 48.50,
-    originalPrice: 55.00,
-    stock: 25,
-    rating: 4.85,
-    reviewCount: 39,
-    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=80',
-    description: 'Precision CNC machined all-metal heat break upgrade for high temperature industrial materials.',
-    attributes: { partType: 'Hotend', maxTemp: '300°C', compatibility: 'Ender 3 / CR-10' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-3d-11',
-    slug: 'direct-drive-extruder-module',
-    name: 'Creality Sprite Direct Drive Dual Gear Extruder',
-    vertical: '3d-printing',
-    category: '3D Printer Parts',
-    brand: 'Creality',
-    price: 59.00,
-    originalPrice: 69.00,
-    stock: 14,
-    rating: 4.7,
-    reviewCount: 26,
-    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-    description: 'Compact 3.3:1 gear ratio direct drive extruder for flexible TPU and precise filament feeding.',
-    attributes: { partType: 'Extruder', gearRatio: '3.3:1', weight: '210g' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-3d-12',
-    slug: 'magnetic-pei-flexible-build-plate',
-    name: '3DOM Dual-Sided Textured PEI Powder Coated Steel Sheet (235x235mm)',
-    vertical: '3d-printing',
-    category: 'Printer Accessories',
-    brand: '3DOM Tech',
-    price: 28.00,
-    originalPrice: 35.00,
-    stock: 40,
-    rating: 4.95,
-    reviewCount: 95,
-    image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80',
-    description: 'Spring steel sheet coated with textured PEI for effortless print removal and perfect first layer adhesion.',
-    attributes: { partType: 'Build plate', size: '235x235mm', surface: 'Textured PEI' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-13',
-    slug: 'smart-filament-dryer-box-s2',
-    name: 'Sunlu S2 Smart Heated Filament Dryer Box with Humidity Sensor',
-    vertical: '3d-printing',
-    category: 'Printer Accessories',
-    brand: 'Sunlu',
-    price: 69.00,
-    originalPrice: 79.99,
-    stock: 16,
-    rating: 4.8,
-    reviewCount: 47,
-    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=80',
-    description: '360° surround heating filament dryer box with touchscreen display to remove moisture from PLA/PETG/Nylon.',
-    attributes: { partType: 'Filament dryer', maxTemp: '70°C', display: 'Touchscreen LCD' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-14',
-    slug: 'silent-cooling-fan-4010-24v',
-    name: 'Noctua NF-A4x10 PWM Ultra Silent Cooling Fan 24V',
-    vertical: '3d-printing',
-    category: '3D Printer Parts',
-    brand: 'Noctua',
-    price: 15.50,
-    originalPrice: 18.00,
-    stock: 60,
-    rating: 4.9,
-    reviewCount: 110,
-    image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80',
-    description: 'Whisper-quiet premium cooling fan for hotend and electronics enclosure airflow.',
-    attributes: { partType: 'Fans', voltage: '24V', noise: '17.9 dBA' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-3d-15',
-    slug: 'gt2-timing-belt-5m-pulleys-kit',
-    name: 'GT2 Reinforced Rubber Timing Belt 5 Meters + 20T Pulleys Set',
-    vertical: '3d-printing',
-    category: '3D Printer Parts',
-    brand: '3DOM Tech',
-    price: 12.00,
-    originalPrice: 15.00,
-    stock: 85,
-    rating: 4.75,
-    reviewCount: 53,
-    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-    description: 'Fiberglass reinforced 6mm width GT2 belt with aluminum pulleys for zero backlash motion.',
-    attributes: { partType: 'Belts & pulleys', length: '5M', pitch: '2mm' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-3d-16',
-    slug: 'bambu-lab-a1-combo-ams-lite',
-    name: 'Bambu Lab A1 Combo with AMS Lite 3D Printer',
-    vertical: '3d-printing',
-    category: 'Printers',
-    brand: 'Bambu Lab',
-    price: 499.00,
-    originalPrice: 559.00,
-    stock: 12,
-    rating: 4.96,
-    reviewCount: 78,
-    image: 'https://images.unsplash.com/photo-1612815150330-80e90c888d22?auto=format&fit=crop&w=800&q=80',
-    description: 'Full-auto calibration 4-color multi-material printer with active flow compensation and 500mm/s print speed.',
-    attributes: { speed: '500mm/s', buildVolume: '256x256x256mm', colors: '4 Colors AMS Lite' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-17',
-    slug: 'creality-k1-max-flagship-corexy',
-    name: 'Creality K1 Max AI CoreXY Flagship 3D Printer',
-    vertical: '3d-printing',
-    category: 'Printers',
-    brand: 'Creality',
-    price: 849.00,
-    originalPrice: 999.00,
-    stock: 6,
-    rating: 4.88,
-    reviewCount: 45,
-    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-    description: 'Blazing 600mm/s speed with AI LiDaR, AI Camera, and large 300x300x300mm build volume.',
-    attributes: { speed: '600mm/s', buildVolume: '300x300x300mm', camera: 'AI LiDAR + HD Cam' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-18',
-    slug: 'elegoo-neptune-4-max-high-speed',
-    name: 'Elegoo Neptune 4 Max Large Build High-Speed Printer',
-    vertical: '3d-printing',
-    category: 'Printers',
-    brand: 'Elegoo',
-    price: 470.00,
-    originalPrice: 520.00,
-    stock: 10,
-    rating: 4.82,
-    reviewCount: 38,
-    image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=800&q=80',
-    description: 'Massive 420x420x480mm print size with Klipper firmware pre-installed and 500mm/s top speed.',
-    attributes: { speed: '500mm/s', buildVolume: '420x420x480mm', firmware: 'Klipper' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-19',
-    slug: 'prusa-mk4s-3d-printer-kit',
-    name: 'Original Prusa MK4S High-Precision 3D Printer Kit',
-    vertical: '3d-printing',
-    category: 'Printers',
-    brand: 'Prusa',
-    price: 799.00,
-    originalPrice: 849.00,
-    stock: 5,
-    rating: 4.98,
-    reviewCount: 94,
-    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=80',
-    description: 'Legendary Nextruder 32-bit architecture with Loadcell sensor for perfect first layer without manual tuning.',
-    attributes: { speed: '350mm/s', buildVolume: '250x210x220mm', extruder: 'Nextruder' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-20',
-    slug: 'silk-dual-color-pla-bundle-1kg',
-    name: '3DOM Magical Silk Co-Extrusion Dual Color PLA (2 Pack Spools)',
-    vertical: '3d-printing',
-    category: 'Filaments',
-    brand: '3DOM Tech',
-    price: 34.99,
-    originalPrice: 44.99,
-    stock: 40,
-    rating: 4.9,
-    reviewCount: 63,
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    description: 'Stunning dichroic color shift filaments (Gold-Purple & Blue-Green) for lustrous 3D art models.',
-    attributes: { material: 'Silk PLA', diameter: '1.75mm', weight: '2 x 1kg', temp: '200-225°C' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-3d-21',
-    slug: 'flashforge-adventurer-5m-pro',
-    name: 'Flashforge Adventurer 5M Pro Enclosed Auto-Leveling Printer',
-    vertical: '3d-printing',
-    category: 'Printers',
-    brand: 'Flashforge',
-    price: 549.00,
-    originalPrice: 599.00,
-    stock: 9,
-    rating: 4.86,
-    reviewCount: 31,
-    image: 'https://images.unsplash.com/photo-1612815150330-80e90c888d22?auto=format&fit=crop&w=800&q=80',
-    description: 'Fully enclosed 600mm/s speed printer with HEPA dual air filtration for safe indoor printing.',
-    attributes: { speed: '600mm/s', buildVolume: '220x220x220mm', filter: 'HEPA + Carbon' },
-    isFeatured: true
-  },
 
-  // GEN Z / KOREAN FASHION VERTICAL
+  // FASHION VERTICAL
   {
     id: 'prod-fashion-1',
-    slug: 'oversized-streetwear-hoodie-sage',
-    name: 'Korean Oversized Heavyweight Hoodie (Sage Green)',
+    slug: 'oversized-korean-streetwear-hoodie',
+    name: 'K-Street Oversized Heavyweight Boxy Hoodie (Charcoal)',
     vertical: 'fashion',
-    category: 'Tops',
-    brand: 'Seoul Studio',
-    price: 48.00,
-    originalPrice: 65.00,
+    category: 'Hoodies & Jackets',
+    brand: 'AderStudio',
+    price: 68.00,
+    originalPrice: 85.00,
     stock: 25,
     rating: 4.9,
-    reviewCount: 42,
+    reviewCount: 78,
     image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80',
-    description: '450GSM French terry fleece hoodie with dropped shoulders and relaxed minimalist silhouette.',
-    attributes: { fabric: '100% Cotton', fit: 'Oversized', gender: 'Unisex' },
+    description: '450GSM French terry cotton hoodie featuring dropped shoulders and high-density minimal front puff print.',
+    attributes: { fabric: '100% Cotton', weight: '450 GSM', fit: 'Oversized Boxy Fit' },
     isFeatured: true
   },
   {
     id: 'prod-fashion-2',
-    slug: 'minimalist-boxy-linen-shirt-offwhite',
-    name: 'Minimalist Boxy Camp Collar Shirt (Off-White)',
+    slug: 'wide-leg-cargo-parachute-pants',
+    name: 'Seoul Utility Parachute Cargo Pants (Sage Green)',
     vertical: 'fashion',
-    category: 'Shirts',
-    brand: 'Seoul Studio',
-    price: 39.00,
-    originalPrice: 49.00,
-    stock: 18,
+    category: 'Pants & Cargos',
+    brand: 'MinimalistLab',
+    price: 54.00,
+    originalPrice: 65.00,
+    stock: 19,
     rating: 4.8,
-    reviewCount: 28,
-    image: 'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=80',
-    description: 'Breathable linen-cotton blend shirt with Cuban collar and boxy modern cut.',
-    attributes: { fabric: 'Linen Blend', fit: 'Boxy Fit', color: 'Off-White' },
+    reviewCount: 45,
+    image: 'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=800&q=80',
+    description: 'Adjustable drawstring cuffs with deep tactical pockets. Crafted from water-repellent lightweight nylon blend.',
+    attributes: { fit: 'Relaxed Wide Leg', closure: 'Elastic Drawstring', waist: 'Mid-Rise' },
     isFeatured: true
   },
   {
     id: 'prod-fashion-3',
-    slug: 'korean-cargo-wide-leg-pants-charcoal',
-    name: 'GenZ Wide-Leg Multi-Pocket Cargo Pants (Charcoal)',
+    slug: 'vintage-acid-wash-graphic-tee',
+    name: 'Neo-Tokyo Cyberpunk Graphic Heavy Tee (Acid Black)',
     vertical: 'fashion',
-    category: 'Bottoms',
-    brand: 'K-Style',
-    price: 54.00,
-    originalPrice: 70.00,
-    stock: 22,
-    rating: 4.85,
-    reviewCount: 65,
-    image: 'https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=800&q=80',
-    description: 'Adjustable drawstring waist cargo trousers with utilitarian 3D pockets and relaxed drape.',
-    attributes: { style: 'Cargo', fit: 'Wide-Leg', closure: 'Elastic Waist' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-fashion-4',
-    slug: 'graphic-vintage-washed-tee-acid',
-    name: 'Vintage Acid Washed Graphic Drop-Shoulder Tee',
-    vertical: 'fashion',
-    category: 'T-shirts',
-    brand: 'Subculture',
-    price: 32.00,
+    category: 'T-Shirts',
+    brand: 'AderStudio',
+    price: 34.50,
     originalPrice: 42.00,
     stock: 35,
-    rating: 4.75,
-    reviewCount: 88,
+    rating: 4.85,
+    reviewCount: 92,
     image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80',
-    description: 'Heavyweight 240GSM cotton tee with custom cyber-vintage chest screen print.',
-    attributes: { fabric: '240GSM Cotton', wash: 'Acid Wash', fit: 'Drop Shoulder' },
+    description: 'Pre-shrunk 260GSM combed cotton shirt with hand-dyed vintage acid wash finish and screen printed graphics.',
+    attributes: { fabric: '260 GSM Cotton', wash: 'Acid Wash', sleeve: 'Short Sleeve Drop' },
     isFeatured: false
-  },
-  {
-    id: 'prod-fashion-5',
-    slug: 'baggy-y2k-denim-jeans-lightwash',
-    name: 'Y2K Baggy Skate Denim Jeans (Light Vintage Wash)',
-    vertical: 'fashion',
-    category: 'Jeans',
-    brand: 'Seoul Studio',
-    price: 62.00,
-    originalPrice: 78.00,
-    stock: 15,
-    rating: 4.9,
-    reviewCount: 37,
-    image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80',
-    description: 'Authentic 90s baggy fit rigid denim featuring subtle distressing and custom branded brass hardware.',
-    attributes: { fit: 'Baggy Skate', material: '100% Cotton Denim', rise: 'Mid Rise' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-fashion-6',
-    slug: 'relaxed-fit-pleated-shorts-beige',
-    name: 'Korean Pleated Tailored Shorts (Sand Beige)',
-    vertical: 'fashion',
-    category: 'Shorts',
-    brand: 'K-Style',
-    price: 36.00,
-    originalPrice: 45.00,
-    stock: 20,
-    rating: 4.7,
-    reviewCount: 19,
-    image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=800&q=80',
-    description: 'Clean double-pleated bermuda shorts designed for effortless summer layering.',
-    attributes: { length: 'Above Knee', fit: 'Pleated Relaxed', style: 'Smart Casual' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-fashion-7',
-    slug: 'retro-square-digital-watch-silver',
-    name: 'Retro Cyber Digital Steel Bracelet Watch (Silver Chrome)',
-    vertical: 'fashion',
-    category: 'Watches',
-    brand: 'Chrono G',
-    price: 45.00,
-    originalPrice: 60.00,
-    stock: 30,
-    rating: 4.95,
-    reviewCount: 51,
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-    description: 'Iconic 80s square digital watch with LED backlight, stopwatch, and water resistance.',
-    attributes: { material: 'Stainless Steel', movement: 'Digital Quartz', waterResist: '30M' },
-    isFeatured: true
   },
 
   // BEAUTY VERTICAL
   {
     id: 'prod-beauty-1',
-    slug: 'midnight-musk-eau-de-parfum-100ml',
-    name: '3DOM Maison Midnight Musk Eau de Parfum (100ml)',
+    slug: 'luxurious-ambrette-rose-eau-de-parfum',
+    name: 'Maison 3DOM Ambrette Rose Eau de Parfum (100ml)',
     vertical: 'beauty',
-    category: 'Perfumes',
+    category: 'Fragrances',
     brand: 'Maison 3DOM',
-    price: 85.00,
-    originalPrice: 110.00,
-    stock: 14,
+    price: 110.00,
+    originalPrice: 135.00,
+    stock: 15,
     rating: 4.95,
-    reviewCount: 73,
+    reviewCount: 68,
     image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80',
-    description: 'Sensual luxury fragrance featuring top notes of smoked bergamot, heart of black rose, and base of rich amber musk.',
-    attributes: { size: '100ml', type: 'Eau de Parfum', notes: 'Bergamot, Rose, Amber' },
+    description: 'An alluring blend of Bulgarian rose, white ambrette seeds, velvety suede, and sparkling bergamot.',
+    attributes: { notes: 'Rose, Ambrette, Suede, Bergamot', size: '100ml / 3.4 fl oz', concentration: 'Eau de Parfum' },
     isFeatured: true
   },
   {
     id: 'prod-beauty-2',
-    slug: 'velvet-rose-amber-cologne-50ml',
-    name: '3DOM Maison Velvet Rose & Warm Amber Perfume Oil (50ml)',
+    slug: 'k-beauty-glass-skin-hyaluronic-serum',
+    name: 'Snail Mucin & Hyaluronic Acid Glass Skin Serum (50ml)',
     vertical: 'beauty',
-    category: 'Perfumes',
-    brand: 'Maison 3DOM',
-    price: 68.00,
-    originalPrice: 80.00,
-    stock: 19,
-    rating: 4.85,
-    reviewCount: 31,
-    image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80',
-    description: 'Long-lasting concentrated perfume oil infused with Damask rose petals and warm cedarwood.',
-    attributes: { size: '50ml', type: 'Perfume Oil', longevity: '12 Hours+' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-beauty-3',
-    slug: 'hydrating-botanical-hair-shampoo-500ml',
-    name: 'Botanique Organic Argan & Oat Milk Hydrating Shampoo (500ml)',
-    vertical: 'beauty',
-    category: 'Shampoo',
-    brand: 'Botanique',
+    category: 'Skincare',
+    brand: 'SeoulGlow',
     price: 28.00,
-    originalPrice: 35.00,
+    originalPrice: 34.00,
     stock: 40,
-    rating: 4.8,
-    reviewCount: 59,
-    image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=800&q=80',
-    description: 'Sulfate-free scalp soothing formula enriched with cold-pressed Moroccan argan oil.',
-    attributes: { size: '500ml', sulfateFree: true, hairType: 'All Hair Types' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-beauty-4',
-    slug: 'restorative-keratin-repair-mask',
-    name: 'Botanique Deep Restorative Keratin & Peptide Hair Mask',
-    vertical: 'beauty',
-    category: 'Masks',
-    brand: 'Botanique',
-    price: 34.00,
-    originalPrice: 42.00,
-    stock: 25,
-    rating: 4.9,
-    reviewCount: 44,
-    image: 'https://images.unsplash.com/photo-1567928269937-ae146e45b428?auto=format&fit=crop&w=800&q=80',
-    description: 'Intense 5-minute conditioning treatment that reverses heat damage and restores glossy shine.',
-    attributes: { size: '250g', formula: 'Keratin + Peptides', use: 'Weekly Treatment' },
-    isFeatured: true
-  },
-  {
-    id: 'prod-beauty-5',
-    slug: 'hyaluronic-acid-glow-face-sheet-masks',
-    name: 'K-Glow Triple Hyaluronic Acid Hydrating Sheet Masks (Set of 5)',
-    vertical: 'beauty',
-    category: 'Masks',
-    brand: 'K-Glow',
-    price: 22.00,
-    originalPrice: 28.00,
-    stock: 50,
-    rating: 4.85,
-    reviewCount: 104,
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
-    description: 'Bio-cellulose facial mask drenched in 30ml of plumping hyaluronic acid & niacinamide serum.',
-    attributes: { packSize: '5 Sheets', keyIngredient: 'Hyaluronic Acid & Niacinamide' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-beauty-6',
-    slug: 'tinted-honey-lip-balm-berry-rose',
-    name: 'K-Glow Nourishing Honey Lip Treatment Balm (Berry Rose)',
-    vertical: 'beauty',
-    category: 'Lip Balms',
-    brand: 'K-Glow',
-    price: 16.00,
-    originalPrice: 20.00,
-    stock: 60,
-    rating: 4.75,
-    reviewCount: 82,
-    image: 'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?auto=format&fit=crop&w=800&q=80',
-    description: 'Sheer glossy tinted balm crafted with organic Manuka honey and vitamin E for juicy hydration.',
-    attributes: { finish: 'Sheer Gloss', shade: 'Berry Rose', SPF: '15' },
-    isFeatured: false
-  },
-  {
-    id: 'prod-beauty-7',
-    slug: 'ultra-nourishing-overnight-lip-sleeping-mask',
-    name: 'K-Glow Intensive Overnight Berry Lip Mask Jar (20g)',
-    vertical: 'beauty',
-    category: 'Lip Balms',
-    brand: 'K-Glow',
-    price: 19.50,
-    originalPrice: 24.00,
-    stock: 45,
-    rating: 4.9,
-    reviewCount: 67,
+    rating: 4.88,
+    reviewCount: 140,
     image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80',
-    description: 'Leave-on lip butter mask that melts away dead skin cells overnight for baby-soft lips.',
-    attributes: { size: '20g', scent: 'Wild Berry', use: 'Overnight' },
+    description: 'Intense hydrating serum formulation enriched with 96% snail secretion filtrate and quadruple HA complex.',
+    attributes: { skinType: 'All Skin Types', volume: '50ml', benefit: 'Deep Hydration & Glass Glow' },
     isFeatured: true
   }
 ];
@@ -611,7 +245,7 @@ const INITIAL_COUPONS = [
     code: 'WELCOME10',
     discountType: 'percentage',
     discountValue: 10,
-    minOrderValue: 30,
+    minOrderValue: 0,
     usageLimit: 1000,
     usedCount: 42,
     isActive: true,
@@ -623,7 +257,7 @@ const INITIAL_COUPONS = [
     discountValue: 20,
     minOrderValue: 50,
     usageLimit: 500,
-    usedCount: 89,
+    usedCount: 18,
     isActive: true,
     expiresAt: '2027-12-31'
   },
@@ -633,7 +267,7 @@ const INITIAL_COUPONS = [
     discountValue: 15,
     minOrderValue: 60,
     usageLimit: 200,
-    usedCount: 15,
+    usedCount: 9,
     isActive: true,
     expiresAt: '2027-12-31'
   }
@@ -645,7 +279,7 @@ const INITIAL_REVIEWS = [
     productId: 'prod-3d-1',
     customerName: 'Alex Mercer',
     rating: 5,
-    comment: 'The Ender 3 V3 SE worked out of the box! Auto-leveling is spot on and CR Touch makes first layers perfect.',
+    comment: 'The Ender 3 V3 SE printed right out of the box with flawless auto-bed leveling!',
     status: 'approved',
     createdAt: '2026-08-20T10:30:00.000Z'
   },
@@ -657,24 +291,6 @@ const INITIAL_REVIEWS = [
     comment: 'Best PLA filament I have used. Zero stringing at 220°C on my Bambu P1S.',
     status: 'approved',
     createdAt: '2026-08-22T14:15:00.000Z'
-  },
-  {
-    id: 'rev-3',
-    productId: 'prod-fashion-1',
-    customerName: 'Ji-hoon L.',
-    rating: 5,
-    comment: 'Heavyweight fleece fabric quality is insane! Feels like a $150 designer hoodie.',
-    status: 'approved',
-    createdAt: '2026-08-24T09:00:00.000Z'
-  },
-  {
-    id: 'rev-4',
-    productId: 'prod-beauty-1',
-    customerName: 'Evelyn V.',
-    rating: 5,
-    comment: 'Smells luxurious! I get compliments everywhere I go. Long lasting projection.',
-    status: 'approved',
-    createdAt: '2026-08-25T18:45:00.000Z'
   }
 ];
 
@@ -721,38 +337,337 @@ const INITIAL_ORDERS = [
   }
 ];
 
-class Database {
+class DatabaseManager {
   constructor() {
-    this.data = {
-      products: INITIAL_PRODUCTS,
-      coupons: INITIAL_COUPONS,
-      reviews: INITIAL_REVIEWS,
-      requests: INITIAL_REQUESTS,
-      orders: INITIAL_ORDERS
+    this.isMongoConnected = false;
+    this.localData = {
+      products: [...INITIAL_PRODUCTS],
+      coupons: [...INITIAL_COUPONS],
+      reviews: [...INITIAL_REVIEWS],
+      requests: [...INITIAL_REQUESTS],
+      orders: [...INITIAL_ORDERS]
     };
-    this.load();
+    this.loadLocal();
   }
 
-  load() {
+  loadLocal() {
     try {
       if (fs.existsSync(DB_FILE)) {
         const fileContent = fs.readFileSync(DB_FILE, 'utf8');
-        this.data = JSON.parse(fileContent);
+        this.localData = JSON.parse(fileContent);
       } else {
-        this.save();
+        this.saveLocal();
       }
     } catch (e) {
-      console.error('Error loading DB, using memory defaults', e);
+      console.error('Error reading local data.json, using defaults', e.message);
     }
   }
 
-  save() {
+  saveLocal() {
     try {
-      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+      fs.writeFileSync(DB_FILE, JSON.stringify(this.localData, null, 2), 'utf8');
     } catch (e) {
-      console.error('Error saving DB file', e);
+      console.error('Error saving local data.json', e.message);
     }
+  }
+
+  async connectMongo(uri) {
+    if (!uri || uri.includes('your_mongodb_connection_string') || uri.includes('<username>')) {
+      console.log('ℹ️  No valid MONGODB_URI provided in backend/.env. Using local JSON store.');
+      return false;
+    }
+    if (uri.includes('<') || uri.includes('>')) {
+      console.warn('⚠️ Warning: MONGODB_URI in backend/.env contains "<" or ">" brackets! Please remove "<" and ">" around your password.');
+    }
+    try {
+      try {
+        const dns = require('dns');
+        dns.setServers(['8.8.8.8', '8.8.4.4']);
+      } catch (dnsErr) {}
+      await mongoose.connect(uri);
+      this.isMongoConnected = true;
+      console.log('✅ Connected to MongoDB Atlas/Database successfully!');
+      await this.seedMongoIfEmpty();
+      return true;
+    } catch (err) {
+      console.error('⚠️ MongoDB connection failed. Falling back to local JSON store:', err.message);
+      this.isMongoConnected = false;
+      return false;
+    }
+  }
+
+  async seedMongoIfEmpty() {
+    try {
+      const prodCount = await Product.countDocuments();
+      if (prodCount === 0) {
+        console.log('🌱 Seeding MongoDB with initial products...');
+        await Product.insertMany(INITIAL_PRODUCTS);
+      } else {
+        // Automatically sync and update image fixes for products in MongoDB
+        for (const item of INITIAL_PRODUCTS) {
+          await Product.updateOne({ id: item.id }, { $set: { image: item.image } });
+        }
+      }
+      // Also update local JSON store product images
+      for (const item of INITIAL_PRODUCTS) {
+        const p = (this.localData.products || []).find((x) => x.id === item.id);
+        if (p) p.image = item.image;
+      }
+      this.saveLocal();
+
+      const couponCount = await Coupon.countDocuments();
+      if (couponCount === 0) {
+        console.log('🌱 Seeding MongoDB with initial coupons...');
+        await Coupon.insertMany(INITIAL_COUPONS);
+      }
+      const revCount = await Review.countDocuments();
+      if (revCount === 0) {
+        await Review.insertMany(INITIAL_REVIEWS);
+      }
+      const reqCount = await RequestModel.countDocuments();
+      if (reqCount === 0) {
+        await RequestModel.insertMany(INITIAL_REQUESTS);
+      }
+      const orderCount = await Order.countDocuments();
+      if (orderCount === 0) {
+        await Order.insertMany(INITIAL_ORDERS);
+      }
+    } catch (err) {
+      console.error('Error during MongoDB seeding:', err.message);
+    }
+  }
+
+  // --- PRODUCTS ---
+  async getProducts() {
+    if (this.isMongoConnected) {
+      const prods = await Product.find().lean();
+      return prods;
+    }
+    return this.localData.products;
+  }
+
+  async getProductByIdentifier(identifier) {
+    if (this.isMongoConnected) {
+      return await Product.findOne({ $or: [{ id: identifier }, { slug: identifier }] }).lean();
+    }
+    return this.localData.products.find(p => p.id === identifier || p.slug === identifier);
+  }
+
+  async createProduct(productData) {
+    if (this.isMongoConnected) {
+      const newProd = new Product(productData);
+      await newProd.save();
+      return newProd.toObject();
+    }
+    this.localData.products.unshift(productData);
+    this.saveLocal();
+    return productData;
+  }
+
+  async updateProduct(id, updateData) {
+    if (this.isMongoConnected) {
+      return await Product.findOneAndUpdate({ id }, { $set: updateData }, { new: true }).lean();
+    }
+    const index = this.localData.products.findIndex(p => p.id === id);
+    if (index === -1) return null;
+    this.localData.products[index] = { ...this.localData.products[index], ...updateData };
+    this.saveLocal();
+    return this.localData.products[index];
+  }
+
+  async deleteProduct(id) {
+    if (this.isMongoConnected) {
+      await Product.deleteOne({ id });
+      return true;
+    }
+    this.localData.products = this.localData.products.filter(p => p.id !== id);
+    this.saveLocal();
+    return true;
+  }
+
+  // --- COUPONS ---
+  async getCoupons() {
+    if (this.isMongoConnected) {
+      return await Coupon.find().lean();
+    }
+    return this.localData.coupons;
+  }
+
+  async getCouponByCode(code) {
+    if (this.isMongoConnected) {
+      return await Coupon.findOne({ code: code.toUpperCase() }).lean();
+    }
+    return this.localData.coupons.find(c => c.code.toUpperCase() === code.toUpperCase());
+  }
+
+  async createCoupon(couponData) {
+    if (this.isMongoConnected) {
+      const c = new Coupon(couponData);
+      await c.save();
+      return c.toObject();
+    }
+    this.localData.coupons.unshift(couponData);
+    this.saveLocal();
+    return couponData;
+  }
+
+  async updateCoupon(code, updateData) {
+    if (this.isMongoConnected) {
+      return await Coupon.findOneAndUpdate({ code: code.toUpperCase() }, { $set: updateData }, { new: true }).lean();
+    }
+    const index = this.localData.coupons.findIndex(c => c.code.toUpperCase() === code.toUpperCase());
+    if (index === -1) return null;
+    this.localData.coupons[index] = { ...this.localData.coupons[index], ...updateData };
+    this.saveLocal();
+    return this.localData.coupons[index];
+  }
+
+  // --- REVIEWS ---
+  async getReviews(productId) {
+    if (this.isMongoConnected) {
+      const query = productId ? { productId, status: 'approved' } : {};
+      return await Review.find(query).sort({ createdAt: -1 }).lean();
+    }
+    if (productId) {
+      return this.localData.reviews.filter(r => r.productId === productId && r.status === 'approved');
+    }
+    return this.localData.reviews;
+  }
+
+  async createReview(reviewData) {
+    if (this.isMongoConnected) {
+      const r = new Review(reviewData);
+      await r.save();
+      return r.toObject();
+    }
+    this.localData.reviews.unshift(reviewData);
+    this.saveLocal();
+    return reviewData;
+  }
+
+  async updateReview(id, status) {
+    if (this.isMongoConnected) {
+      return await Review.findOneAndUpdate({ id }, { $set: { status } }, { new: true }).lean();
+    }
+    const review = this.localData.reviews.find(r => r.id === id);
+    if (!review) return null;
+    review.status = status;
+    this.saveLocal();
+    return review;
+  }
+
+  async deleteReview(id) {
+    if (this.isMongoConnected) {
+      await Review.deleteOne({ id });
+      return true;
+    }
+    this.localData.reviews = this.localData.reviews.filter(r => r.id !== id);
+    this.saveLocal();
+    return true;
+  }
+
+  // --- SOURCING REQUESTS ---
+  async getRequests() {
+    if (this.isMongoConnected) {
+      return await RequestModel.find().sort({ createdAt: -1 }).lean();
+    }
+    return this.localData.requests;
+  }
+
+  async createRequest(reqData) {
+    if (this.isMongoConnected) {
+      const req = new RequestModel(reqData);
+      await req.save();
+      return req.toObject();
+    }
+    this.localData.requests.unshift(reqData);
+    this.saveLocal();
+    return reqData;
+  }
+
+  async updateRequest(id, status) {
+    if (this.isMongoConnected) {
+      return await RequestModel.findOneAndUpdate({ id }, { $set: { status } }, { new: true }).lean();
+    }
+    const reqItem = this.localData.requests.find(r => r.id === id);
+    if (!reqItem) return null;
+    reqItem.status = status;
+    this.saveLocal();
+    return reqItem;
+  }
+
+  // --- ORDERS ---
+  async getOrders() {
+    if (this.isMongoConnected) {
+      return await Order.find().sort({ createdAt: -1 }).lean();
+    }
+    return this.localData.orders;
+  }
+
+  async getOrderById(id) {
+    if (this.isMongoConnected) {
+      return await Order.findOne({ id }).lean();
+    }
+    return this.localData.orders.find(o => o.id === id);
+  }
+
+  async createOrder(orderData) {
+    if (this.isMongoConnected) {
+      const o = new Order(orderData);
+      await o.save();
+      return o.toObject();
+    }
+    this.localData.orders.unshift(orderData);
+    this.saveLocal();
+    return orderData;
+  }
+
+  async updateOrder(id, updateData) {
+    if (this.isMongoConnected) {
+      return await Order.findOneAndUpdate({ id }, { $set: updateData }, { new: true }).lean();
+    }
+    const order = this.localData.orders.find(o => o.id === id);
+    if (!order) return null;
+    Object.assign(order, updateData);
+    this.saveLocal();
+    return order;
+  }
+
+  // --- STATS ANALYTICS ---
+  async getStats() {
+    const orders = await this.getOrders();
+    const products = await this.getProducts();
+    const requests = await this.getRequests();
+
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.finalAmount || 0), 0);
+    const totalProducts = products.length;
+    const pendingRequests = requests.filter(r => r.status === 'pending').length;
+
+    const salesByVertical = {
+      '3d-printing': 0,
+      'fashion': 0,
+      'beauty': 0
+    };
+
+    orders.forEach(order => {
+      (order.items || []).forEach(item => {
+        if (item.vertical && salesByVertical[item.vertical] !== undefined) {
+          salesByVertical[item.vertical] += (item.price * item.quantity);
+        }
+      });
+    });
+
+    return {
+      totalOrders,
+      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      totalProducts,
+      pendingRequests,
+      salesByVertical,
+      isMongoConnected: this.isMongoConnected
+    };
   }
 }
 
-module.exports = new Database();
+const dbManager = new DatabaseManager();
+module.exports = dbManager;
